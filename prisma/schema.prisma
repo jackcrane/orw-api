@@ -1,0 +1,16 @@
+datasource db {
+  provider = "mysql"
+  url      = "mysql://apps:Guro6297@db.jackcrane.rocks:3306/orw"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id String @id @default(uuid())
+  name String
+  email String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
