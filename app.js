@@ -54,6 +54,31 @@ app.get("/events", async (req, res) => {
   res.json(events);
 });
 
+app.get("/weather", async (req, res) => {
+  const latitude = req.query.latitude || 39.1031;
+  const longitude = req.query.longitude || -84.512;
+  const getWeatherData = async (latitude, longitude) => {
+    const pointsUrl = `https://api.weather.gov/points/${latitude},${longitude}`;
+    const pointsFetch = await fetch(pointsUrl);
+    if (!pointsFetch.ok) {
+      throw new Error("Unable to locate weather observation station");
+      return;
+    }
+    const pointsData = await pointsFetch.json();
+    const forecastHourlyUrl = pointsData.properties.forecastHourly;
+    const forecastFetch = await fetch(forecastHourlyUrl);
+    if (!forecastFetch.ok) {
+      res.status(500).send("Error fetching weather");
+      console.error("Unable to fetch weather information from station");
+      return;
+    }
+    const forecastData = await forecastFetch.json();
+    return forecastData;
+  };
+  const weather = await getWeatherData(latitude, longitude);
+  res.json(weather);
+});
+
 app.listen(3000, () => {
   console.log("Server running on port 3000");
 });
