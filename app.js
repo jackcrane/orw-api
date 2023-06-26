@@ -2,6 +2,8 @@ import express from "express";
 import cheerio from "cheerio";
 import fetch from "node-fetch";
 import fs from "fs";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 const app = express();
 
@@ -77,6 +79,58 @@ app.get("/weather", async (req, res) => {
   };
   const weather = await getWeatherData(latitude, longitude);
   res.json(weather);
+});
+
+app.post("/user", async (req, res) => {
+  await prisma.user.create({
+    data: {
+      name: req.body.name,
+      email: req.body.email,
+    },
+  });
+
+  res.json({ success: true });
+});
+
+app.get("/users/new", async (req, res) => {
+  const users = await prisma.user.findMany({
+    where: {
+      downloaded: false,
+    },
+  });
+
+  // Generate a CSV file with headers "name", "email", and "createdAt"
+  const csv = users
+    .map((user) => `${user.name},${user.email},${user.createdAt}`)
+    .join("\n");
+
+  // Send the CSV file to the client
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader("Content-Disposition", "attachment; filename=users.csv");
+  res.send(csv);
+
+  await prisma.user.updateMany({
+    where: {
+      downloaded: false,
+    },
+    data: {
+      downloaded: true,
+    },
+  });
+});
+
+app.get("/users/all", async (req, res) => {
+  const users = await prisma.user.findMany();
+
+  // Generate a CSV file with headers "name", "email", and "createdAt"
+  const csv = users
+    .map((user) => `${user.name},${user.email},${user.createdAt}`)
+    .join("\n");
+
+  // Send the CSV file to the client
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader("Content-Disposition", "attachment; filename=users.csv");
+  res.send(csv);
 });
 
 app.listen(3000, () => {
