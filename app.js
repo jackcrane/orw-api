@@ -83,6 +83,16 @@ app.get("/weather", async (req, res) => {
 
 app.post("/user", async (req, res) => {
   try {
+    const user = await prisma.user.findFirst({
+      where: {
+        email: req.body.email,
+      },
+    });
+
+    if (user) {
+      return res.json({ success: true });
+    }
+
     await prisma.user.create({
       data: {
         name: req.body.name,
