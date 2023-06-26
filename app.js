@@ -12,6 +12,8 @@ Array.prototype.replaceAll = function (search, replacement) {
   return target.replace(new RegExp(search, "g"), replacement);
 };
 
+app.use(express.json());
+
 app.get("/", (req, res) => {});
 
 app.get("/events", async (req, res) => {
@@ -80,14 +82,18 @@ app.get("/weather", async (req, res) => {
 });
 
 app.post("/user", async (req, res) => {
-  await prisma.user.create({
-    data: {
-      name: req.body.name,
-      email: req.body.email,
-    },
-  });
+  try {
+    await prisma.user.create({
+      data: {
+        name: req.body.name,
+        email: req.body.email,
+      },
+    });
 
-  res.json({ success: true });
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 app.get("/users/new", async (req, res) => {
