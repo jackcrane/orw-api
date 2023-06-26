@@ -12,9 +12,7 @@ Array.prototype.replaceAll = function (search, replacement) {
   return target.replace(new RegExp(search, "g"), replacement);
 };
 
-app.get("/", (req, res) => {
-  res.send(require("./package.json").version);
-});
+app.get("/", (req, res) => {});
 
 app.get("/events", async (req, res) => {
   const data = await fetch("https://www.ohioriverway.org/rivertown-events");
